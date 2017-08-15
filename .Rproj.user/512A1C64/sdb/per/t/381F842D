@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "---\noutput:\n  md_document:\n    variant: markdown_github\n---\n\n<!-- README.md is generated from README.Rmd. Please edit that file -->\n\n```{r, echo = FALSE}\nknitr::opts_chunk$set(\n  collapse = TRUE,\n  comment = \"#>\",\n  fig.path = \"README-\"\n)\n```\n\n**Author:** [Brad Boehmke](http://bradleyboehmke.github.io/)<br/> **License:** [GPL (&gt;= 2)](https://opensource.org/licenses/gpl-license)\n\n`rbootcamp` is an R package that provides a structured learning environment to deliver tutorials for my R Bootcamp courses.\n\n## Installation\n\nYou can install `rbootcamp` straight from GitHub with:\n\n```\nif (packageVersion(\"devtools\") < 1.6) {\n  install.packages(\"devtools\")\n}\n\ndevtools::install_github(\"bradleyboehmke/rbootcamp\")\n```\n\n## Start Learning\n\n`rbootcamp` provides several tutorials covering common analytic techniques:\n\n1.  \"Hello\": An introduction to `rbootcamp`\n2.  \"EDA\": Practicing Exploratory Data Analysis\n\n\nTo start learning just use the `get_tutorial` function to activate the desired tutorial:\n\n```\nlibrary(rbootcamp)\n\nget_tutorial(\"Hello\")\n```\n\nEnjoy!\n",
+    "created" : 1502829476066.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3171202058",
+    "id" : "381F842D",
+    "lastKnownWriteTime" : 1502829658,
+    "last_content_update" : 1502829658813,
+    "path" : "~/Desktop/Packages/rbootcamp/README.Rmd",
+    "project_path" : "README.Rmd",
+    "properties" : {
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}
