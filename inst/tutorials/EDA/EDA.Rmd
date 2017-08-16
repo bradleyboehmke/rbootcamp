@@ -39,21 +39,31 @@ library(readxl)
 
 ## Importing the Data
 
-The first step to any data analysis process is to *get* the data. Go ahead and import the *CustomerData.xlsx* data and save the data frame as __customer__.  This requires that you have already set your working directory to the course folder.
+The first step to any data analysis process is to *get* the data. Assuming our customer data is located in an Excel file titled *CustomerData.xlsx* and located in our current working directory, how would you load it?
 
-```{r import, exercise=TRUE}
-
+```{r import-question1, echo=FALSE}
+quiz(caption = "Knowledge Check",
+question("How would you read in the names of the spreadsheets in the CustomerData.xlsx file?",
+  answer("read_excel('CustomerData.xlsx')"),
+  answer("excel_sheets('CustomerData.xlsx')", correct = TRUE),
+  answer("read_sheets('CustomerData.xlsx')"),
+  allow_retry = TRUE,
+  random_answer_order = TRUE,
+  correct = "Correct! For this Excel file there are two spreadsheets:  'Metadata' and 'Data'."
+),
+question("Assuming you want to import the 'Data' spreadsheet from the CustomerData.xlsx file, what is the correct command?",
+  answer("CustomerID, Region, TownSize", correct = TRUE),
+  answer("CustomerID, Gender, Age"),
+  answer("Region, Gender, Age"),
+  answer("CustomerID, Region Age"),
+  allow_retry = TRUE,
+  random_answer_order = TRUE,
+  correct = "Correct! For this Excel file there are two spreadsheets:  'Metadata' and 'Data'."
+)
+)
 ```
 
-```{r import-hint-1}
-# the first thing you want to do is read the Excel spreadsheets
-excel_sheets("data/CustomerData.xlsx")
-```
 
-```{r import-hint-2}
-# once you have the sheet name then you can load the data
-customer <- read_excel("data/CustomerData.xlsx", sheet = "Data")
-```
 
 Next, let's get a basic feel for the data by assessing the following:
 
