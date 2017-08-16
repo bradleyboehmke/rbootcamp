@@ -69,7 +69,7 @@ For the following exercises I have pre-loaded the customer data and saved it as 
 3. What type of variables are in this data (i.e. character, integer, double)?
 
 ```{r prepare-data, echo=FALSE}
-customer <- customer
+customer <- rbootcamp::customer
 ```
 
 ```{r understand, exercise=TRUE, exercise.setup = "prepare-data"}
@@ -721,3 +721,5 @@ quiz(caption = "Knowledge Check",
 ```
 
 ## Understanding Your Data Through Visualization
+
+
