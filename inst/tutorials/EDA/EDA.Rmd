@@ -52,20 +52,17 @@ question("How would you read in the names of the spreadsheets in the CustomerDat
   correct = "Correct! For this Excel file there are two spreadsheets:  'Metadata' and 'Data'."
 ),
 question("Assuming you want to import the 'Data' spreadsheet from the CustomerData.xlsx file, what is the correct command?",
-  answer("CustomerID, Region, TownSize", correct = TRUE),
-  answer("CustomerID, Gender, Age"),
-  answer("Region, Gender, Age"),
-  answer("CustomerID, Region Age"),
+  answer("read_excel('CustomerData.xlsx', sheet = 'Data')", correct = TRUE),
+  answer("read_excel('CustomerData.xlsx')"),
+  answer("excel_sheets('CustomerData.xlsx', sheet = 'Data')"),
+  answer("read_csv('CustomerData.xlsx', sheet = 'Data')"),
   allow_retry = TRUE,
-  random_answer_order = TRUE,
-  correct = "Correct! For this Excel file there are two spreadsheets:  'Metadata' and 'Data'."
+  random_answer_order = TRUE
 )
 )
 ```
 
-
-
-Next, let's get a basic feel for the data by assessing the following:
+For the following exercises I have pre-loaded the customer data and saved it as a data frame named `customer`.  Let's get a basic feel for this `customer` data set by assessing the following:
 
 1. What are the dimensions of this data set?
 2. What are the names of all the variables?
@@ -101,13 +98,25 @@ question("What are the dimensions of our customer data?",
   answer("5000 x 60"),
   answer("5000 x 59", correct = TRUE),
   answer("5000"),
-  answer("59 x 5000")
+  answer("59 x 5000"),
+  allow_retry = TRUE,
+  random_answer_order = TRUE
 ),
 question("What are the names of the first 3 variables?",
   answer("CustomerID, Region, TownSize", correct = TRUE),
   answer("CustomerID, Gender, Age"),
   answer("Region, Gender, Age"),
-  answer("CustomerID, Region Age")
+  answer("CustomerID, Region Age"),
+  allow_retry = TRUE,
+  random_answer_order = TRUE
+),
+question("What type of variable is JobCategory?",
+  answer("character", correct = TRUE),
+  answer("integer"),
+  answer("factor"),
+  answer("double"),
+  allow_retry = TRUE,
+  random_answer_order = TRUE
 )
 )
 ```
@@ -177,64 +186,219 @@ question("After you remove all missing values, how many rows are in the clean da
 
 Descriptive statistics are the first pieces of information used to understand and represent a data set. There goal, in essence, is to describe the main features of numerical and categorical information with simple summaries. Lets perform some descriptive statistics that will help answer the following questions:
 
-1. Which JobCategory has the largest average HHIncome? Which has the lowest? 
-2. Is there a large difference in the number of earners in each JobCategory?
-3. How many earners are in each JobCategory across the regions?
-4. Does the average HHIncome vary across JobCategory and Region?
+### 1. How is average HHIncome distributed across JobCategory? 
 
 ```{r prepare-data2, echo=FALSE}
 customer <- na.omit(customer)
 ```
 
 ```{r descriptive1, exercise=TRUE, exercise.setup = "prepare-data2"}
-
+# fill in these functions to answer the question
+customer %>%
+  group_by() %>% 
+  summarize() %>% 
+  arrange()
 ```
 
 ```{r descriptive1-hint-1}
-# We see that the Labor job category has the largest average HHIncome while 
-# Sales has the lowest.
-customers %>%
+# First, we want to group our data by job category
+customer %>%
+  group_by(JobCategory) %>% 
+  summarize() %>% 
+  arrange()
+```
+
+```{r descriptive1-hint-2}
+# Next, we compute our summary statistic
+customer %>%
+  group_by(JobCategory) %>% 
+  summarize(avg_HHIncome = mean(HHIncome)) %>% 
+  arrange()
+```
+
+```{r descriptive1-solution}
+# Finally, we arrange our summary statistic so we can easily see how the
+# job categories rank
+customer %>%
   group_by(JobCategory) %>% 
   summarize(avg_HHIncome = mean(HHIncome)) %>% 
   arrange(desc(avg_HHIncome))
 ```
 
-```{r descriptive1-hint-2}
-# There is a pretty subtantial difference in the number of earners across the 
-# categories.
-customers %>% 
-  count(JobCategory) %>% 
-  arrange(desc(n))
+```{r descriptive-question1, echo=FALSE}
+quiz(caption = "Knowledge Check",
+question("Which JobCategory has the largest average HHIncome?",
+  answer("Crafts"),
+  answer("Labor", correct = TRUE),
+  answer("Sales"),
+  answer("Professional"),
+  random_answer_order = TRUE
+),
+question("Which JobCategory has the smallest average HHIncome?",
+  answer("Crafts"),
+  answer("Labor"),
+  answer("Sales", correct = TRUE),
+  answer("Professional"),
+  random_answer_order = TRUE
+)
+)
 ```
 
-```{r descriptive1-hint-3}
-# We can inspect the number of earners in each category with the following:
-customers %>%
-  count(JobCategory, Region) %>% 
-  arrange(desc(n))
+
+### 2. Is there a large difference in the number of customers in each JobCategory?
+
+```{r descriptive2, exercise=TRUE, exercise.setup = "prepare-data2"}
+# fill in the count function to answer the question
+customer %>% 
+  count()
 ```
 
-```{r descriptive1-hint-4}
-# Yes, the average HHIncome does vary across JobCategory and Region.  We can 
-# assess this by computing and comparing the standard deviation of the avg
-# HHIncome across regions:
-customers %>%
-  group_by(JobCategory, Region) %>% 
-  summarize(avg_HHIncome = mean(HHIncome)) %>% 
-  group_by(JobCategory) %>%
-  summarize(sd = sd(avg_HHIncome))
+```{r descriptive2-hint-1}
+# We can use count to count the number of observations.
+customer %>%
+  count(JobCategory)
 ```
 
-Good job!  Now lets do a little more exploration to see if we can identify if:
 
-5. Our customers tend to be married, single, or an equal mix? 
-6. Are married customers more educated than single customers?
+```{r descriptive2-solution}
+# We can also include sort = TRUE to sort the output
+customer %>%
+  count(JobCategory, sort = TRUE)
+```
+
+```{r descriptive-question2, echo=FALSE}
+quiz(caption = "Knowledge Check",
+question("Which JobCategory captures the most customers?",
+  answer("Crafts"),
+  answer("Sales", correct = TRUE),
+  answer("Labor"),
+  answer("Professional"),
+  random_answer_order = TRUE
+),
+question("How many customers are in the *Service* career field?",
+  answer("1635"),
+  answer("212"),
+  answer("620", correct = TRUE),
+  answer("452"),
+  random_answer_order = TRUE
+)
+)
+```
 
 
+### 3. How many customers are in each JobCategory across the regions?
 
-Alright!  Lastly, can you identify:
+```{r descriptive3, exercise=TRUE, exercise.setup = "prepare-data2"}
+# fill in the count function to answer the question
+customer %>%
+  count()
+```
 
-7. Which age group is most likely to lease an automobile?
-8. Which age group tends to have the greatest CarValue?
-9. Which credit card has the highest default rate?
+
+```{r descriptive3-hint-1}
+# We can inspect the number of earners in each category by region with the following:
+customer %>%
+  count(JobCategory, Region)
+```
+
+```{r descriptive3-hint-2}
+# by sorting we can get the categories and regions with the most customers
+customer %>%
+  count(JobCategory, Region, sort = TRUE)
+```
+
+```{r descriptive3-hint-3}
+# and we can add arrange to identify the categories and regions with the least 
+# customers
+customer %>%
+  count(JobCategory, Region) %>%
+  arrange(n)
+```
+
+```{r descriptive-question3, echo=FALSE}
+quiz(caption = "Knowledge Check",
+question("Which JobCategory and Region captures the most customers?",
+  answer("Sales in region 4"),
+  answer("Sales in region 5", correct = TRUE),
+  answer("Agriculture in region 1"),
+  answer("Professional in region 5"),
+  random_answer_order = TRUE
+),
+question("Which JobCategory and Region has the __least__ amount of customers?",
+  answer("Sales in region 4"),
+  answer("Sales in region 5"),
+  answer("Agriculture in region 4", correct = TRUE),
+  answer("Professional in region 5"),
+  random_answer_order = TRUE
+)
+)
+```
+
+### 4. How does HHIncome vary across JobCategory, Region and Gender?
+
+```{r descriptive4, exercise=TRUE, exercise.setup = "prepare-data2"}
+# fill in the functions to answer these questions
+customer %>%
+  group_by() %>% 
+  summarize()
+```
+
+```{r descriptive4-hint-1}
+# first we group by the category of interest (i.e. JobCategory, Region, Gender)
+customer %>%
+  group_by(JobCategory) %>% 
+  summarize()
+```
+
+```{r descriptive4-hint-2}
+# next we can compute the standard deviation of HHIncome to assess how income
+# varies within the category of interest
+customer %>%
+  group_by(JobCategory) %>% 
+  summarize(income_sd = sd(HHIncome))
+```
+
+```{r descriptive4-hint-3}
+# Last, we rank order the variability
+customer %>%
+  group_by(JobCategory) %>% 
+  summarize(income_sd = sd(HHIncome)) %>%
+  arrange(income_sd)
+```
+
+```{r descriptive-question4, echo=FALSE}
+quiz(caption = "Knowledge Check",
+question("Which JobCategory has the __largest__ income variability?",
+  answer("Crafts"),
+  answer("Sales"),
+  answer("Labor", correct = TRUE),
+  answer("Professional"),
+  random_answer_order = TRUE
+),
+question("Which Region has the __smallest__ income variability?",
+  answer("Sales in region 4"),
+  answer("Sales in region 5"),
+  answer("Agriculture in region 4", correct = TRUE),
+  answer("Professional in region 5"),
+  random_answer_order = TRUE
+),
+question("Is there much difference between Male and Female income variability?",
+  answer("No"),
+  answer("Yes", correct = TRUE),
+  random_answer_order = TRUE,
+  correct = "Male incomes have about 20% more variation than females!",
+  incorrect = "Male incomes have about 20% more variation than females!"
+)
+)
+```
+
+### 5. Our customers tend to be married, single, or an equal mix? 
+
+### 6. Are married customers more educated than single customers?
+
+### 7. Which age group is most likely to lease an automobile?
+
+### 8. Which age group tends to have the greatest CarValue?
+
+### 9. Which credit card has the highest default rate?
 
