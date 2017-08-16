@@ -129,7 +129,6 @@ A common task in data analysis is dealing with missing values.  Let's assess mis
 2. Which variables contain these missing values?
 3. Omit all rows with missing values in them? Now how many observations does your data have?
 
-
 ```{r missing, exercise=TRUE, exercise.setup = "prepare-data"}
 
 ```
@@ -156,6 +155,7 @@ question("How many missing values are in this data set?",
   answer("124", correct = TRUE),
   answer("98"),
   answer("32"),
+  allow_retry = TRUE,
   random_answer_order = TRUE
 ),
 question("How many variables contain missing values?",
@@ -163,6 +163,7 @@ question("How many variables contain missing values?",
   answer("6"),
   answer("4"),
   answer("2"),
+  allow_retry = TRUE,
   random_answer_order = TRUE
 ),
 question("How many missing values are in the Gender variable?",
@@ -170,6 +171,7 @@ question("How many missing values are in the Gender variable?",
   answer("16"),
   answer("7"),
   answer("2"),
+  allow_retry = TRUE,
   random_answer_order = TRUE
 ),
 question("After you remove all missing values, how many rows are in the clean data set?",
@@ -177,7 +179,9 @@ question("After you remove all missing values, how many rows are in the clean da
   answer("4888"),
   answer("4918"),
   answer("4617"),
-  random_answer_order = TRUE
+  allow_retry = TRUE,
+  random_answer_order = TRUE,
+  correct = "That's right!  So by removing missing values we removed 107 customers from our data set."
 )
 )
 ```
@@ -187,6 +191,8 @@ question("After you remove all missing values, how many rows are in the clean da
 Descriptive statistics are the first pieces of information used to understand and represent a data set. There goal, in essence, is to describe the main features of numerical and categorical information with simple summaries. Lets perform some descriptive statistics that will help answer the following questions:
 
 ### 1. How is average HHIncome distributed across JobCategory? 
+
+The goal is to group our data by *JobCategory* and then compute the mean of the *HHIncome* variable. Rank ordering your data based on the mean income (using `arrange`) will make it easier to interpret the results.
 
 ```{r prepare-data2, echo=FALSE}
 customer <- na.omit(customer)
@@ -247,6 +253,8 @@ question("Which JobCategory has the smallest average HHIncome?",
 
 ### 2. Is there a large difference in the number of customers in each JobCategory?
 
+Count the number of observations for each *JobCategory* level.
+
 ```{r descriptive2, exercise=TRUE, exercise.setup = "prepare-data2"}
 # fill in the count function to answer the question
 customer %>% 
@@ -273,20 +281,24 @@ question("Which JobCategory captures the most customers?",
   answer("Sales", correct = TRUE),
   answer("Labor"),
   answer("Professional"),
-  random_answer_order = TRUE
+  random_answer_order = TRUE,
+  allow_retry = TRUE
 ),
 question("How many customers are in the *Service* career field?",
   answer("1635"),
   answer("212"),
-  answer("620", correct = TRUE),
+  answer("610", correct = TRUE),
   answer("452"),
-  random_answer_order = TRUE
+  random_answer_order = TRUE,
+  allow_retry = TRUE
 )
 )
 ```
 
 
 ### 3. How many customers are in each JobCategory across the regions?
+
+Now count the number of observations for each *JobCategory* and *Region* combination.  Rank ordering your data based on the mean income (using `arrange`) will make it easier to interpret the results. 
 
 ```{r descriptive3, exercise=TRUE, exercise.setup = "prepare-data2"}
 # fill in the count function to answer the question
@@ -322,19 +334,23 @@ question("Which JobCategory and Region captures the most customers?",
   answer("Sales in region 5", correct = TRUE),
   answer("Agriculture in region 1"),
   answer("Professional in region 5"),
-  random_answer_order = TRUE
+  random_answer_order = TRUE,
+  allow_retry = TRUE
 ),
 question("Which JobCategory and Region has the __least__ amount of customers?",
   answer("Sales in region 4"),
   answer("Sales in region 5"),
   answer("Agriculture in region 4", correct = TRUE),
   answer("Professional in region 5"),
-  random_answer_order = TRUE
+  random_answer_order = TRUE,
+  allow_retry = TRUE
 )
 )
 ```
 
 ### 4. How does HHIncome vary across JobCategory, Region and Gender?
+
+The goal is to group our data by *JobCategory* and then compute the standard deviation of the *HHIncome* variable.  You can compute the standard deviation of variable *x* by using the function `sd(x)`. 
 
 ```{r descriptive4, exercise=TRUE, exercise.setup = "prepare-data2"}
 # fill in the functions to answer these questions
@@ -373,14 +389,16 @@ question("Which JobCategory has the __largest__ income variability?",
   answer("Sales"),
   answer("Labor", correct = TRUE),
   answer("Professional"),
-  random_answer_order = TRUE
+  random_answer_order = TRUE,
+  allow_retry = TRUE
 ),
 question("Which Region has the __smallest__ income variability?",
-  answer("Sales in region 4"),
-  answer("Sales in region 5"),
-  answer("Agriculture in region 4", correct = TRUE),
-  answer("Professional in region 5"),
-  random_answer_order = TRUE
+  answer("4"),
+  answer("5"),
+  answer("2", correct = TRUE),
+  answer("1"),
+  random_answer_order = TRUE,
+  allow_retry = TRUE
 ),
 question("Is there much difference between Male and Female income variability?",
   answer("No"),
@@ -392,13 +410,314 @@ question("Is there much difference between Male and Female income variability?",
 )
 ```
 
-### 5. Our customers tend to be married, single, or an equal mix? 
+### 5. What percentage of our customers are married vs. unmarried? 
+
+Compute the percentage of customers that are married vs. unmarried.  Note that the variable of interest here is *MarritalStatus*.  This will require you to count the number of observations in each level of *MarritalStatus* and then use `mutate` to create a new variable that computes the percentage.
+
+```{r descriptive5, exercise=TRUE, exercise.setup = "prepare-data2"}
+# fill in the functions to answer these questions
+customer %>%
+  count() %>% 
+  mutate()
+```
+
+```{r descriptive5-hint-1}
+# first we count the number of observations that are married vs. unmarried
+customer %>%
+  count(MaritalStatus) %>% 
+  mutate()
+```
+
+```{r descriptive5-hint-2}
+# next we use mutate to create a new variable that computes the percent of each
+customer %>%
+  count(MaritalStatus) %>% 
+  mutate(pct = n / sum(n))
+```
+
+
+```{r descriptive-question5, echo=FALSE}
+quiz(caption = "Knowledge Check",
+ question("Are the majority of our customers married or unmarried?",
+  answer("Married"),
+  answer("Unmarried", correct = TRUE),
+  random_answer_order = TRUE,
+  allow_retry = TRUE
+),
+question("How many customers are married?",
+  answer("2346"),
+  answer("2599"),
+  answer("2401", correct = TRUE),
+  random_answer_order = TRUE,
+  allow_retry = TRUE
+),
+question("What percentage of our customers are married?",
+  answer("44%"),
+  answer("53%"),
+  answer("48%", correct = TRUE),
+  answer("56%"),
+  random_answer_order = TRUE,
+  allow_retry = TRUE
+)
+)
+```
 
 ### 6. Are married customers more educated than single customers?
 
-### 7. Which age group is most likely to lease an automobile?
+The goal is to group our data by *MaritalStatus* and then compute the average education in years (*EducationYears* variable).  For this exercise, compute the `mean` and `median` education in years for married vs. unmarried customers.
 
-### 8. Which age group tends to have the greatest CarValue?
+```{r descriptive6, exercise=TRUE, exercise.setup = "prepare-data2"}
+# fill in the functions to answer these questions
+customer %>%
+  group_by() %>% 
+  summarize()
+```
+
+```{r descriptive6-hint-1}
+# first we group our data based on marital status
+customer %>%
+  group_by(MaritalStatus) %>% 
+  summarize()
+```
+
+```{r descriptive6-hint-2}
+# next we compute the mean and median education levels
+customer %>%
+  group_by(MaritalStatus) %>% 
+  summarize(med_Ed = mean(EducationYears),
+            mean_Ed = mean(EducationYears))
+```
+
+
+```{r descriptive-question6, echo=FALSE}
+quiz(caption = "Knowledge Check",
+ question("What is the median education level for unmarried customers?",
+  answer("13.2 years"),
+  answer("15.1 years"),
+  answer("14.1 years"),
+  answer("14.6 years", correct = TRUE),
+  random_answer_order = TRUE,
+  allow_retry = TRUE,
+  correct = "The mean and median education levels are about 14.5 years for both married and unmarried customers."
+),
+ question("What is the mean education level for married customers?",
+  answer("13.9 years"),
+  answer("15.1 years"),
+  answer("14.1 years"),
+  answer("14.5 years", correct = TRUE),
+  random_answer_order = TRUE,
+  allow_retry = TRUE
+),
+question("Are the education levels about the same for married and unmarried?",
+  answer("No"),
+  answer("Yes", correct = TRUE),
+  random_answer_order = TRUE,
+  allow_retry = TRUE,
+  correct = "The mean and median education levels are about 14.5 years for both married and unmarried customers."
+)
+)
+```
+
+### 7. Which ages are most likely to lease an automobile?
+
+To answer this question, perform the following sequence:
+
+1. count the number of observations by *Age* and *CarOwnership*
+2. create a new variable that computes the percentage of car leasers
+3. filter for only those customers that lease
+4. arrange your percent leasers variable in descending order
+
+```{r descriptive7, exercise=TRUE, exercise.setup = "prepare-data2"}
+# fill in the functions to answer these questions
+customer %>%
+  count() %>%
+  mutate() %>% 
+  filter() %>% 
+  arrange()
+```
+
+```{r descriptive7-hint-1}
+# first we count our data by age and car ownership
+customer %>%
+  count(Age, CarOwnership) %>%
+  mutate() %>% 
+  filter() %>% 
+  arrange()
+```
+
+```{r descriptive7-hint-2}
+# next we compute the percentage of leasers versus non leasing activities
+# note how I use the round() to round my percents to 2 decimals
+customer %>%
+  count(Age, CarOwnership) %>%
+  mutate(pct_lease = round(n / sum(n), 2)) %>% 
+  filter() %>% 
+  arrange()
+```
+
+```{r descriptive7-hint-2}
+# then we can filter for just those customers that lease
+customer %>%
+  count(Age, CarOwnership) %>%
+  mutate(pct_lease = round(n / sum(n), 2)) %>% 
+  filter(CarOwnership == "Lease") %>% 
+  arrange()
+```
+
+```{r descriptive7-solution}
+# and lastly we rank order the data based on percent lease
+customer %>%
+  count(Age, CarOwnership) %>%
+  mutate(pct_lease = round(n / sum(n), 2)) %>% 
+  filter(CarOwnership == "Lease") %>% 
+  arrange(desc(pct_lease))
+```
+
+
+```{r descriptive-question7, echo=FALSE}
+quiz(caption = "Knowledge Check",
+ question("What age has the highest percentage of leasers?",
+  answer("39 years"),
+  answer("22 years"),
+  answer("65 years"),
+  answer("79", correct = TRUE),
+  random_answer_order = TRUE,
+  allow_retry = TRUE
+),
+ question("What age has the lowest percentage of leasers?",
+  answer("39 years", correct = TRUE),
+  answer("22 years"),
+  answer("65 years"),
+  answer("79"),
+  random_answer_order = TRUE,
+  allow_retry = TRUE
+)
+)
+```
+
+### 8. Which age group tends to have the greatest car value?
+
+The goal is to find the top 5 age groups with the largest average *CarValue*.  You can accomplish this by grouping the data by *Age*, computing the mean *CarValue*, and then using the `top_n()` function to find the top 5.
+
+```{r descriptive8, exercise=TRUE, exercise.setup = "prepare-data2"}
+# fill in the functions to answer these questions
+customer %>%
+  group_by() %>%
+  summarize() %>% 
+  top_n(5)
+```
+
+```{r descriptive8-hint-1}
+# first we group our data by age
+customer %>%
+  group_by(Age) %>%
+  summarize() %>% 
+  top_n(5)
+```
+
+```{r descriptive8-hint-2}
+# next we compute the mean of the CarValue variable
+customer %>%
+  group_by(Age) %>%
+  summarize(avg_value = mean(CarValue)) %>% 
+  top_n(5)
+```
+
+
+```{r descriptive8-solution}
+customer %>%
+  group_by(Age) %>%
+  summarize(avg_value = mean(CarValue)) %>% 
+  top_n(5)
+```
+
+
+```{r descriptive-question8, echo=FALSE}
+quiz(caption = "Knowledge Check",
+ question("Which age has the highest average car value?",
+  answer("67 years"),
+  answer("22 years"),
+  answer("52 years"),
+  answer("57", correct = TRUE),
+  random_answer_order = TRUE,
+  allow_retry = TRUE,
+  incorrect = "Look closely.  The top_n function keeps the data ordered by age but identifies those ages with the top 5 largest mean car values."
+),
+ question("What is the average car value for 52 year olds?",
+  answer("$37,389", correct = TRUE),
+  answer("$32,450"),
+  answer("$30,111"),
+  answer("$36,986"),
+  random_answer_order = TRUE,
+  allow_retry = TRUE
+)
+)
+```
 
 ### 9. Which credit card has the highest default rate?
 
+The goal is to find the top 5 age groups with the largest average *CarValue*.  You can accomplish this by grouping the data by *Age*, computing the mean *CarValue*, and then using the `top_n()` function to find the top 5.
+
+```{r descriptive9, exercise=TRUE, exercise.setup = "prepare-data2"}
+# fill in the functions to answer these questions
+customer %>%
+  group_by() %>%
+  summarize() %>% 
+  top_n(5)
+```
+
+```{r descriptive9-hint-1}
+# first we group our data by age
+customer %>%
+  group_by(Age) %>%
+  summarize() %>% 
+  top_n(5)
+```
+
+```{r descriptive9-hint-2}
+# next we compute the mean of the CarValue variable
+customer %>%
+  group_by(Age) %>%
+  summarize(avg_value = mean(CarValue)) %>% 
+  top_n(5)
+```
+
+
+```{r descriptive9-solution}
+customer %>%
+  group_by(Age) %>%
+  summarize(avg_value = mean(CarValue)) %>% 
+  top_n(5)
+```
+
+
+```{r descriptive-question9, echo=FALSE}
+quiz(caption = "Knowledge Check",
+ question("Which credit card has the highest loan default?",
+  answer("Visa"),
+  answer("Disc"),
+  answer("AMEX"),
+  answer("Othe", correct = TRUE),
+  random_answer_order = TRUE,
+  allow_retry = TRUE
+),
+ question("Which credit card has the secondhighest loan default?",
+  answer("Visa"),
+  answer("Disc"),
+  answer("AMEX", correct = TRUE),
+  answer("Othe"),
+  random_answer_order = TRUE,
+  allow_retry = TRUE
+),
+ question("What is the loan default rate for Visa customers?",
+  answer("22%"),
+  answer("24%"),
+  answer("23%", correct = TRUE),
+  answer("29%"),
+  random_answer_order = TRUE,
+  allow_retry = TRUE
+)
+)
+```
+
+## Understanding Your Data Through Visualization
