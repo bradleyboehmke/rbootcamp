@@ -1,0 +1,230 @@
+---
+title: "Tutorial 1: Exploratory Data Analysis"
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
+---
+
+<script type="text/javascript" async
+    src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
+
+## Introduction
+
+This module provides an opportunity to put into practice many of the techniques discussed in this short course. The goal is to think through the tool(s) you’ll need and use them properly to answer the questions. This case study continues to use the *Customer* data and, although not comprehensive, provides you the opportunity to perform several steps in the analytic process to include:
+
+1. Organizing your files
+2. Importing the data
+3. Dealing with missing values
+4. Understanding numerical and categorical variables through descriptive statistics 
+5. Using visualization to understand your data
+
+For this tutorial, I have preloaded the following packages for your use:
+
+```{r setup, include=FALSE}
+library(learnr)
+library(tidyverse)
+library(readxl)
+
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE, collapse=TRUE)
+```
+
+```{r, eval=FALSE}
+library(tidyverse)
+library(readxl)
+```
+
+## Importing the Data
+
+The first step to any data analysis process is to *get* the data. Go ahead and import the *CustomerData.xlsx* data and save the data frame as __customer__.  This requires that you have already set your working directory to the course folder.
+
+```{r import, exercise=TRUE}
+
+```
+
+```{r import-hint-1}
+# the first thing you want to do is read the Excel spreadsheets
+excel_sheets("data/CustomerData.xlsx")
+```
+
+```{r import-hint-2}
+# once you have the sheet name then you can load the data
+customer <- read_excel("data/CustomerData.xlsx", sheet = "Data")
+```
+
+Next, let's get a basic feel for the data by assessing the following:
+
+1. What are the dimensions of this data set?
+2. What are the names of all the variables?
+3. What type of variables are in this data (i.e. character, integer, double)?
+
+```{r prepare-data, echo=FALSE}
+customer <- customer
+```
+
+```{r understand, exercise=TRUE, exercise.setup = "prepare-data"}
+
+```
+
+```{r understand-hint-1}
+dim(customer)
+```
+
+```{r understand-hint-2}
+names(customer)
+```
+
+```{r understand-hint-3}
+# you can assess the data with glimpse
+glimpse(customer)
+
+# or by looping over each column and assessing the type
+sapply(customer, typeof)
+```
+
+```{r understand-question1, echo=FALSE}
+quiz(caption = "Knowledge Check",
+question("What are the dimensions of our customer data?",
+  answer("5000 x 60"),
+  answer("5000 x 59", correct = TRUE),
+  answer("5000"),
+  answer("59 x 5000")
+),
+question("What are the names of the first 3 variables?",
+  answer("CustomerID, Region, TownSize", correct = TRUE),
+  answer("CustomerID, Gender, Age"),
+  answer("Region, Gender, Age"),
+  answer("CustomerID, Region Age")
+)
+)
+```
+
+## Dealing with Missing Data
+
+A common task in data analysis is dealing with missing values.  Let's assess missing values in our `customer` data set.   Go ahead and check out:
+
+1. How many missing values are in the data?
+2. Which variables contain these missing values?
+3. Omit all rows with missing values in them? Now how many observations does your data have?
+
+
+```{r missing, exercise=TRUE, exercise.setup = "prepare-data"}
+
+```
+
+```{r missing-hint-1}
+sum(is.na(customer))
+```
+
+```{r missing-hint-2}
+colSums(is.na(customer)) %>%
+  sort(decreasing = TRUE)
+```
+
+```{r missing-hint-3}
+customer <- na.omit(customer)
+
+dim(customer)
+```
+
+```{r missing-question1, echo=FALSE}
+quiz(caption = "Knowledge Check",
+question("How many missing values are in this data set?",
+  answer("136"),
+  answer("124", correct = TRUE),
+  answer("98"),
+  answer("32"),
+  random_answer_order = TRUE
+),
+question("How many variables contain missing values?",
+  answer("8", correct = TRUE),
+  answer("6"),
+  answer("4"),
+  answer("2"),
+  random_answer_order = TRUE
+),
+question("How many missing values are in the Gender variable?",
+  answer("33", correct = TRUE),
+  answer("16"),
+  answer("7"),
+  answer("2"),
+  random_answer_order = TRUE
+),
+question("After you remove all missing values, how many rows are in the clean data set?",
+  answer("4893", correct = TRUE),
+  answer("4888"),
+  answer("4918"),
+  answer("4617"),
+  random_answer_order = TRUE
+)
+)
+```
+
+## Understanding Your Data Through Descriptive Statistics
+
+Descriptive statistics are the first pieces of information used to understand and represent a data set. There goal, in essence, is to describe the main features of numerical and categorical information with simple summaries. Lets perform some descriptive statistics that will help answer the following questions:
+
+1. Which JobCategory has the largest average HHIncome? Which has the lowest? 
+2. Is there a large difference in the number of earners in each JobCategory?
+3. How many earners are in each JobCategory across the regions?
+4. Does the average HHIncome vary across JobCategory and Region?
+
+```{r prepare-data2, echo=FALSE}
+customer <- na.omit(customer)
+```
+
+```{r descriptive1, exercise=TRUE, exercise.setup = "prepare-data2"}
+
+```
+
+```{r descriptive1-hint-1}
+# We see that the Labor job category has the largest average HHIncome while 
+# Sales has the lowest.
+customers %>%
+  group_by(JobCategory) %>% 
+  summarize(avg_HHIncome = mean(HHIncome)) %>% 
+  arrange(desc(avg_HHIncome))
+```
+
+```{r descriptive1-hint-2}
+# There is a pretty subtantial difference in the number of earners across the 
+# categories.
+customers %>% 
+  count(JobCategory) %>% 
+  arrange(desc(n))
+```
+
+```{r descriptive1-hint-3}
+# We can inspect the number of earners in each category with the following:
+customers %>%
+  count(JobCategory, Region) %>% 
+  arrange(desc(n))
+```
+
+```{r descriptive1-hint-4}
+# Yes, the average HHIncome does vary across JobCategory and Region.  We can 
+# assess this by computing and comparing the standard deviation of the avg
+# HHIncome across regions:
+customers %>%
+  group_by(JobCategory, Region) %>% 
+  summarize(avg_HHIncome = mean(HHIncome)) %>% 
+  group_by(JobCategory) %>%
+  summarize(sd = sd(avg_HHIncome))
+```
+
+Good job!  Now lets do a little more exploration to see if we can identify if:
+
+5. Our customers tend to be married, single, or an equal mix? 
+6. Are married customers more educated than single customers?
+
+
+
+Alright!  Lastly, can you identify:
+
+7. Which age group is most likely to lease an automobile?
+8. Which age group tends to have the greatest CarValue?
+9. Which credit card has the highest default rate?
+

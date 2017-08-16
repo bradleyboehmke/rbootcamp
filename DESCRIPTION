@@ -1,11 +1,20 @@
 Package: rbootcamp
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Additional structured learning tutorials to learn R programming 
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Authors@R: person("Bradley", "Boehmke", email = "bradleyboehmke@gmail.com", role = c("aut", "cre"))
+Maintainer: Bradley Boehmke <bradleyboehmke@gmail.com>
+Description: Provides a structured learning environment to deliver tutorials 
+    for my intro to R programming bootcamp courses.
+License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
+Depends: R (>= 3.4.0)
+Imports: learnr,
+    tidyverse,
+    moments,
+    outliers,
+    GGally
+RoxygenNote: 6.0.1
+URL: https://github.com/bradleyboehmke/rbootcamp
+BugReports: https://github.com/bradleyboehmke/rbootcamp/issues
