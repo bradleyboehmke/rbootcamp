@@ -555,7 +555,7 @@ customer %>%
   arrange()
 ```
 
-```{r descriptive7-hint-2}
+```{r descriptive7-hint-3}
 # then we can filter for just those customers that lease
 customer %>%
   count(Age, CarOwnership) %>%
