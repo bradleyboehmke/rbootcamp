@@ -23,5 +23,5 @@ get_tutorial <- function(tutorial) {
     stop("Missing argument: tutorial argument required", call. = FALSE)
   }
 
-  learnr::run_tutorial(tutorial, package = "learningAnalytics")
+  learnr::run_tutorial(tutorial, package = "rbootcamp")
 }
