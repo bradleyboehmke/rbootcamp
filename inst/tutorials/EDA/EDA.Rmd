@@ -1000,7 +1000,407 @@ ggplot(customer, aes(x = HHIncome, y = CreditDebt, color = LoanDefault)) +
   geom_smooth(method = "lm")
 ```
 
+###
+
+At this point, a couple questions may be raised:
+
+1. Is there a difference in the credit debt between loan defaulters and non-defaulters?
+2. How should we interpret this relationship between credit debt and income?
+
+We'll answer these in the next two sections.
+
+## Comparing Groups
+
+Hypothesis testing is a useful statistical tool that can be used to draw a conclusion about the population from a sample. In the last section we ended by asking the question *"is there a difference in the credit debt between loan defaulters and non-defaulters?"*  This question can be answered with fundamental hypothesis testing.
+
+### One-sample t-test
+
+The one-sample t-test compares a sample’s mean with a known value, when the variance of the population is <u>unknown</u>. Consider we want to assess the credit debt of our customers and compare it to a certain value. For example, let’s assume the nation-wide average of credit debt is 1.5 ($1.50 of debt for every $1.00 of income) and we want to know if the mean is significantly different than the national average.
+
+To test if our customer's average debt is different than the national average we can use the `t.test` function. The results below show that our mean is 1.87 (which is greater than the average of 1.5). Furthermore, the p-value < 0.05 and 95% confidence interval suggests that our customer's credit debt levels are, on average, statistically different than the national average.
+
+```{r, echo=FALSE}
+customer <- na.omit(rbootcamp::customer)
+```
+
+
+```{r}
+t.test(customer$CreditDebt, mu = 1.5)
+```
+
+We can also modify our `t.test` if we only want to test in one direction.  For example, since our customers' average credit debt is 1.87 we could test if this is statistically __*greater*__ than the national average of 1.5 by including `alternative = "greater"` (note that the default is "two.sided" and there is also a "less" option).
+
+```{r}
+t.test(customer$CreditDebt, mu = 1.5, alternative = "greater")
+```
+
+However, keep in mind that the `t.test` assumes our data is normally distributed.  We can test if this data is normally distributed with `shapiro.test`.  Since the below results have a p-value < 0.05, this variable is *not* normally distributed.
+
+```{r}
+shapiro.test(customer$CreditDebt)
+```
+
+We can easily see this by looking at the histogram:
+
+```{r}
+p1 <- ggplot(customer, aes(x = CreditDebt)) +
+  geom_histogram() +
+  ggtitle("Credit Debt Distribution")
+
+p2 <- ggplot(customer, aes(x = CreditDebt)) +
+  geom_histogram() +
+  scale_x_log10() +
+  ggtitle("Log-transformed Distribution")
+
+gridExtra::grid.arrange(p1, p2, nrow = 1)
+```
+
+Since our data is not normally distributed, we can use the nonparametric Wilcoxon signed-rank test with `wilcox.test` to provide us a more accurate result.  Below, we see that our p-value = 1, which suggests that our average customer debt *is not* statistically different than the national average!
+
+```{r}
+wilcox.test(customer$CreditDebt, mu = 1.5, alternative = "greater")
+```
+
+###
+
+The last I checked the national average income is about $51,000.  Compare our customer's income to the national average.
+
+```{r compare, exercise=TRUE, exercise.setup = "prepare-data2"}
+
+```
+
+```{r compare-hint-1}
+# check the mean of our customer's income
+mean(customer$HHIncome)
+```
+
+```{r compare-hint-2}
+# check whether this variable is normally distributed
+shapiro.test(customer$HHIncome)
+
+# or visually
+ggplot(customer, aes(x = HHIncome)) +
+  geom_histogram()
+```
+
+```{r compare-hint-3}
+# use wilcox.test since data is not normally distributed
+wilcox.test(customer$HHIncome)
+```
+
+```{r compare-question, echo=FALSE}
+quiz(caption = "Knowledge Check",
+ question("What is the mean income of our customers?",
+  answer("$49,010"),
+  answer("$62,316"),
+  answer("$52,148"),
+  answer("$55,002", correct = TRUE),
+  random_answer_order = TRUE,
+  allow_retry = TRUE
+),
+ question("Is HHIncome normally distributed?",
+  answer("Yes"),
+  answer("No", correct = TRUE),
+  random_answer_order = TRUE,
+  allow_retry = TRUE
+),
+ question("Is there a statistical difference between our customers average income and the national average income?",
+  answer("No", correct = TRUE),
+  answer("Yes"),
+  random_answer_order = TRUE,
+  allow_retry = TRUE
+)
+)
+```
+
+
+### Two-sample t-test
+
+Now let’s say we want to compare the differences between the average credit debt levels for those customers that have defaulted on a loan vs those that have not. Here, we want to perform a two-sample t-test to see if they are statistically different.  
+
+In this case we can modify our `t.test`.  Here we are comparing the credit debt levels between the two categories of loan defaulters ("Yes" vs. "No") with `CreditDebt ~ LoanDefault`.  The results state that the average credit debt for non-defaulters is 1.44 and the average credit debt for defaulters is 3.26.  Plus, we see that the results are statistically significant.
+
+```{r}
+t.test(CreditDebt ~ LoanDefault, data = customer)
+```
+
+###
+
+However, keep in mind that our `CreditDebt` variable is not normally distributed. Go ahead and test it with `wilcox.test`:
+
+```{r compare2, exercise=TRUE, exercise.setup = "prepare-data2"}
+
+```
+
+```{r compare2-solution}
+wilcox.test(CreditDebt ~ LoanDefault, data = customer)
+```
+
+```{r compare2-question, echo=FALSE}
+quiz(caption = "Knowledge Check",
+ question("Is there a statistical difference in credit debt levels between loan defaulters and non-defaulters?",
+  answer("No"),
+  answer("Yes", correct = TRUE),
+  random_answer_order = TRUE,
+  allow_retry = TRUE,
+  correct = "Correct!  The p-value for the wilcox.test is less than 0.05",
+  incorrect = "Check again. The p-value for the wilcox.test is less than 0.05"
+)
+)
+```
+
+###
+
+Suppose we wish to extend this test.  Rather than just test for differences between two groups, what if we wish to test whether the mean value is the same across multiple categories.  For example, what if we desire to test if the mean credit debt is equal across all regions or job categories. Here we turn to analysis of variance (ANOVA).
+
+### Analysis of Variance
+
+ANOVA will test the hypotheses:
+
+- $H_0: \mu_{group_1} = \mu_{group_2} = \cdots = \mu_{group_n}$
+
+- $H_a: \text{Not all the population means are equal}$
+
+To perform ANOVA in R we can use the `aov` function. The summary of our `anova` object shows us several statistics.  The primary one of interest is the `Pr(>F)`, which is our p-value.  Here our p-value < 0.05, which suggests that not all job categories have the same credit debt levels, on average.  It basically says that at least one of the job categories' credit debt differs from another job category; however, this doesn't tell us which one.
+
+```{r}
+anova <- aov(CreditDebt ~ JobCategory, data = customer)
+summary(anova)
+```
+
+###
+
+To identify which job categories differ with regard to their credit debt levels we can use the `TukeyHSD` function. The output of `TukeyHSD` provides the pairwise differences (`diff`) for the cut categories, the 95% confidence range (`lwr`, `upr`) and the p-value (`p adj`) for that difference.
+
+If you look for the rows with the small p-values you will find the job categories that have significant differences:
+
+- The credit debt levels for the Sales job category are 0.80 *lower* than the Craft category
+- Sales is 1.01 *lower* than Labor
+- Sales is 0.62 *lower* than Professional
+- Sales is 0.93 *lower* than Service
+
+```{r}
+TukeyHSD(anova)
+```
+
+To make it easier to identify differences, we can easily view this information with `plot`.  This is plotting the pair-wise comparisons in the same order as the table output above.
+
+```{r}
+diff <- TukeyHSD(anova)
+
+par(mar = c(5, 10, 3, 1)) # this just modifies the plot margins
+plot(diff, las = 1)
+```
+
+Basically, customers in the Sales job category tend to have lower credit debt than most other job categories.
+
+###
+
+Go ahead and compare the credit debt levels across the different regions.  Are there any regions that have statistical difference in credit debt levels?
+
+```{r compare3, exercise=TRUE, exercise.setup = "prepare-data2"}
+
+```
+
+```{r compare3-solution}
+anova <- aov(CreditDebt ~ Region, data = customer)
+summary(anova)
+```
+
+```{r compare3-question, echo=FALSE}
+quiz(caption = "Knowledge Check",
+ question("Are there any regions that have statistical difference in credit debt levels?",
+  answer("Yes"),
+  answer("No", correct = TRUE),
+  random_answer_order = TRUE,
+  allow_retry = TRUE,
+  correct = "Correct!  The p-value for the ANOVA test is is not significant.",
+  incorrect = "Check again. The p-value for the ANOVA test is is not significant."
+)
+)
+```
+
+
 ## Understanding Relationships
+
+A big part of EDA is to try and understand relationships between variables.  One of the most common ways to identify relationships is through *correlation* analysis.  Correlation is a bivariate analysis that measures the extent that two variables are related (“co-related”) to one another. The value of the correlation coefficient varies between +1 and -1. When the value of the correlation coefficient lies around ±1, then it is said to be a perfect degree of association between the two variables (near +1 implies a strong positive association and near -1 implies a strong negative association). As the correlation coefficient nears 0, the relationship between the two variables weakens with a near 0 value implying no association between the two variables. 
+
+###
+
+As we saw earlier, there appears to be a relationship between income and credit debt. Furthermore, there appears to be a difference in this relationship for loan defaulters and non-defaulters.
+
+```{r}
+ggplot(customer, aes(x = HHIncome, y = CreditDebt, color = LoanDefault)) +
+  geom_point(alpha = .10) +
+  scale_x_log10() +
+  scale_y_log10() +
+  geom_smooth(method = "lm")
+```
+
+###
+
+R provides multiple functions to analyze correlations.  To calculate the correlation between two variables we use `cor()`.  When using `cor()` there are two arguments (other than the variables) that need to be considered.  
+
+1. The first is `use =` which allows us to decide how to handle missing data. The default is `use = everything` but if there is missing data in your data set this will cause the output to be `NA` unless we explicitly state to only use complete observations with `use = complete.obs`. Since we've removed missing values this should not be a problem.
+2. The second argument is `method =` which allows us to specify if we want to use "pearson", "kendall", or "spearman". Pearson is the default method.
+
+Here we see that the correlation between income and credit debt is 0.67 when using the Pearson's method; however, the correlation is 0.58 when using the Spearman method.  In this case, since our variables are not normally distributed the Spearman method is provided a more accurate correlation.
+
+```{r, message=FALSE, warning=FALSE}
+cor(customer$HHIncome, customer$CreditDebt)
+cor(customer$HHIncome, customer$CreditDebt, method = "spearman")
+```
+
+###
+
+Unfortunately `cor()` only provides the *r* coefficient(s) and does not test for significance nor provide confidence intervals.  To get these parameters for a simple two variable analysis I use `cor.test()`.  In our example we see that the *p*-value is significant.  When you use the Peason method the results will provide the 95% confidence interval; however, the Spearman method does not.
+
+```{r, message=FALSE, warning=FALSE}
+cor.test(customer$HHIncome, customer$CreditDebt, method = "spearman")
+```
+
+###
+
+Go ahead and compute the correlation between income (*HHIncome*) and month credit card expenditures (*CardSpendMonth*).
+
+```{r corr, exercise=TRUE, exercise.setup = "prepare-data2", message=FALSE, warning=FALSE}
+
+```
+
+```{r corr-solution}
+# Pearson method
+cor.test(customer$HHIncome, customer$CardSpendMonth)
+
+# Spearman method
+cor.test(customer$HHIncome, customer$CardSpendMonth, method = "spearman")
+```
+
+```{r corr-question, echo=FALSE}
+quiz(caption = "Knowledge Check",
+ question("What is the correlation coefficient using the Pearson method?",
+  answer("0.612"),
+  answer("0.425"),
+  answer("0.348", correct = TRUE),
+  random_answer_order = TRUE,
+  allow_retry = TRUE
+),
+ question("Is this correlation significant?",
+  answer("No"),
+  answer("Yes", correct = TRUE),
+  random_answer_order = TRUE,
+  allow_retry = TRUE
+)
+)
+```
+
+###
+
+You can also incorporate this into piped functions to streamline your analyses.  For instance, you can calculate the correlation (and p-value) within `summarize`.
+
+```{r, message=FALSE, warning=FALSE}
+customer %>%
+  summarize(r = cor(HHIncome, CreditDebt, method = "spearman"),
+            p_value = cor.test(HHIncome, CreditDebt, method = "spearman")$p.value)
+```
+
+Why is this important?  Because you may want to understand relationships at different categorical levels.  For instance, does the correlation between income and credit debt differ depending on the whether or not the customers have defaulted on a loan or not? To answer this we just incorporate a `group_by` statement to calculate the correlations and associated p-values for defaulters vs. non-defaulters.  
+
+Here, we see that the correlation for customers that *have* previously defaulted is 0.72 whereas the correlation for customers that *have not* previously defaulted is 0.57.  Thus, customers with a previous default tend to have higher credit debt to income ratios (probably explains why they've previously defaulted!.
+
+```{r, message=FALSE, warning=FALSE}
+customer %>%
+  group_by(LoanDefault) %>%
+  summarize(r = cor(HHIncome, CreditDebt, method = "spearman"),
+            p_value = cor.test(HHIncome, CreditDebt, method = "spearman")$p.value)
+```
+
+###
+
+Go ahead and compute the correlation between income and credit debt for each job category.  
+
+```{r corr2, exercise=TRUE, exercise.setup = "prepare-data2", message=FALSE, warning=FALSE}
+
+```
+
+```{r corr2-hint-1}
+# first group the data by region.  now just fill in the summarize function to
+# compute the correlatino and extract the p-values
+customer %>%
+  group_by(Region) %>%
+  summarize(r = ),
+            p_value = )
+```
+
+```{r corr2-solution}
+customer %>%
+  group_by(Region) %>%
+  summarize(r = cor(HHIncome, CreditDebt, method = "spearman"),
+            p_value = cor.test(HHIncome, CreditDebt, method = "spearman")$p.value)
+```
+
+```{r corr2-question, echo=FALSE}
+quiz(caption = "Knowledge Check",
+ question("What is the correlation coefficient for region 2?",
+  answer("0.59"),
+  answer("0.52"),
+  answer("0.61", correct = TRUE),
+  random_answer_order = TRUE,
+  allow_retry = TRUE
+),
+ question("What is the correlation coefficient for region 4?",
+  answer("0.59"),
+  answer("0.61"),
+  answer("0.54", correct = TRUE),
+  random_answer_order = TRUE,
+  allow_retry = TRUE
+)
+)
+```
+
+###
+
+Although correlation provides a measurement of the relationship strength between two variables, it does not provide us with much more information. To gain more insights we can use linear regression.  However, this is going beyond the intent of this course.
+
+## Continue learning
+
+There are many tutorials at [http://uc-r.github.io/](http://uc-r.github.io/) and I continue to add to them each month.  This is a great place to start building your fundamental R skills.
+
+Also, if you enjoyed learning in this interactive environment and would like to continue to learn about some fundamental analytic techniques such as:
+
+- Unsupervised learning with principal components analysis & cluster analysis
+- Supervised predictions with linear regression
+- Supervised classification with logistic regression & discriminant analysis
+- Resampling
+- Linear regression model selection
+
+Then close out of this tutorial and run the following code:
+
+```{r, eval=FALSE}
+# install package
+devtools::install_github("bradleyboehmke/learningAnalytics")
+
+# load package
+library(learningAnalytics)
+```
+
+You can access 7 (1 intro and 6 analytic) tutorials:
+
+1. "Hello": An introduction
+2. "EDA": Exploratory Data Analysis
+3. "Unsupervised": Principal Components Analysis & Cluster Analysis
+4. "Linear Regression": Linear Regression
+5. "Supervised Classification": Logistic Regression & Discriminant Analysis
+6. "Resampling": Leave-One-Out Cross-Validation, *k*-Fold Cross Validation, & Bootstrapping
+7. "Model Selection": Best Subset & Stepwise Selection for Linear Models
+
+Access any one of these using code such as:
+
+```{r, eval=FALSE}
+get_tutorial("Linear Regression")
+```
+
+__*ENJOY!*__
+
 
 
 

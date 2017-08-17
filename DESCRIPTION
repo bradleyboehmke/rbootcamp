@@ -11,10 +11,7 @@ Encoding: UTF-8
 LazyData: true
 Depends: R (>= 3.4.0)
 Imports: learnr,
-    tidyverse,
-    moments,
-    outliers,
-    GGally
+    tidyverse
 RoxygenNote: 6.0.1
 URL: https://github.com/bradleyboehmke/rbootcamp
 BugReports: https://github.com/bradleyboehmke/rbootcamp/issues
