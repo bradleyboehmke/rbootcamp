@@ -195,7 +195,7 @@ Descriptive statistics are the first pieces of information used to understand an
 The goal is to group our data by *JobCategory* and then compute the mean of the *HHIncome* variable. Rank ordering your data based on the mean income (using `arrange`) will make it easier to interpret the results.
 
 ```{r prepare-data2, echo=FALSE}
-customer <- na.omit(customer)
+customer <- na.omit(rbootcamp::customer)
 ```
 
 ```{r descriptive1, exercise=TRUE, exercise.setup = "prepare-data2"}
@@ -721,5 +721,286 @@ quiz(caption = "Knowledge Check",
 ```
 
 ## Understanding Your Data Through Visualization
+
+We can answer the same questions in the previous section by using `ggplot2` to visualize our data.
+
+### 1. How is average HHIncome distributed across JobCategory? 
+
+In the last section we grouped our data by *JobCategory* and then computed the mean of the *HHIncome* variable with the below code.  Can you fill in the `ggplot` code to visualize the results?  You only need to fill in the `x` and `y` variables.  `geom_col()` will plot the required bar chart.
+
+```{r viz1, exercise=TRUE, exercise.setup = "prepare-data2"}
+df <- customer %>%
+  group_by(JobCategory) %>% 
+  summarize(avg_HHIncome = mean(HHIncome))
+
+ggplot(data = df, aes(x =  , y =  )) +
+  geom_col()
+```
+
+```{r viz1-hint-1}
+df <- customer %>%
+  group_by(JobCategory) %>% 
+  summarize(avg_HHIncome = mean(HHIncome))
+
+ggplot(data = df, aes(x = JobCategory, y =  avg_HHIncome)) +
+  geom_col()
+```
+
+```{r viz1-hint-2}
+# we can even reorder our x-axis based on the income levels
+ggplot(data = df, aes(x = reorder(JobCategory, -avg_HHIncome), y =  avg_HHIncome)) +
+  geom_col()
+```
+
+### 2. Is there a large difference in the number of customers in each JobCategory?
+
+If we just want to count the number of observations for each *JobCategory* level, we can do this easily with a bar chart (`geom_bar`).
+
+Can you fill in the `ggplot` code to visualize the results?  You only need to fill in the `data` and `x` arguments (remember, not all `geom`s require an `x` *and* `y` variable).  `geom_bar()` will take care of the rest.
+
+```{r viz2, exercise=TRUE, exercise.setup = "prepare-data2"}
+ggplot(data = , aes(x =  )) +
+  geom_bar()
+```
+
+```{r viz2-hint-1}
+ggplot(data = customer, aes(x = )) +
+  geom_bar()
+```
+
+```{r viz2-hint-2}
+ggplot(data = customer, aes(x = JobCategory)) +
+  geom_bar()
+```
+
+### 3. How many customers are in each JobCategory across the regions?
+
+What if we want to look at the number of customers for each *JobCategory* __and__ *Region* combination.  We can do this by *facetting* with `facet_wrap()`.  See if you can complete the ggplot code to do this.  Hint, you just need to add a variable to `facet_wrap()`.
+
+```{r viz3, exercise=TRUE, exercise.setup = "prepare-data2"}
+ggplot(data = customer, aes(x = JobCategory)) +
+  geom_bar() +
+  facet_wrap()
+```
+
+```{r viz3-hint-1}
+ggplot(data = customer, aes(x = JobCategory)) +
+  geom_bar() +
+  facet_wrap(~ Region)
+```
+
+### 4. How does HHIncome vary across JobCategory, Region and Gender?
+
+In the last section we answered this question by computing the standard deviation of *HHIncome* across each variable of concern.  Using a histogram (`geom_histogram`) and facetting will help us understand this visually. Complete this code by:
+
+1. Adding the appropriate `x` variable
+2. Adding the appropriate `geom_`
+3. Adding the `facet_wrap`
+
+```{r viz4, exercise=TRUE, exercise.setup = "prepare-data2"}
+ggplot(data = customer, aes(x = )) +
+  
+  
+```
+
+```{r viz4-hint-1}
+# assess how HHIncome is distributed across JobCategory
+ggplot(data = customer, aes(x = HHIncome)) +
+  geom_histogram() +
+  facet_wrap(~ JobCategory)
+```
+
+```{r viz4-hint-2}
+# assess how HHIncome is distributed across JobCategory
+ggplot(data = customer, aes(x = HHIncome)) +
+  geom_histogram() +
+  facet_wrap(~ Region)
+```
+
+```{r viz4-hint-3}
+# assess how HHIncome is distributed across JobCategory
+ggplot(data = customer, aes(x = HHIncome)) +
+  geom_histogram() +
+  facet_wrap(~ Gender)
+```
+
+Given that income is so skewed, see if you can adjust the x-axis scale to be on a logarithmic scale.  Hint, you only need to add a `scale_x_` function to the following code.
+
+```{r viz4a, exercise=TRUE, exercise.setup = "prepare-data2"}
+ggplot(data = customer, aes(x = HHIncome)) +
+  geom_histogram() +
+  facet_wrap(~ Gender)
+```
+
+```{r viz4a-hint-1}
+ggplot(data = customer, aes(x = HHIncome)) +
+  geom_histogram() +
+  facet_wrap(~ Gender) +
+  scale_x_log10()
+```
+
+### 5. What percentage of our customers are married vs. unmarried? 
+
+In the last section we computed the percentage of married vs. unmarried customers with the following code.  Can you pipe (`%>%`) the results of this code directly into `ggplot` and plot a bar chart to illustrate the results?
+
+```{r viz5, exercise=TRUE, exercise.setup = "prepare-data2"}
+customer %>%
+  count(MaritalStatus) %>% 
+  mutate(pct = n / sum(n))
+```
+
+```{r viz5-hint-1}
+# first you need to pipe it into ggplot and now you just need to add the 
+# appropriate geom (hint: geom_col)
+customer %>%
+  count(MaritalStatus) %>% 
+  mutate(pct = n / sum(n)) %>%
+  ggplot(aes(x = MaritalStatus, y = pct))
+```
+
+```{r viz5-hint-2}
+customer %>%
+  count(MaritalStatus) %>% 
+  mutate(pct = n / sum(n)) %>%
+  ggplot(aes(x = MaritalStatus, y = pct)) +
+  geom_col()
+```
+
+That's right!  Now see how the final plot had its y-axis in decimal form even though they represent percentages.  See if you can add the right arguments in the `scale_y_continuous()` function below to change this axis to be formatted as percentages.
+
+```{r viz5a, exercise=TRUE, exercise.setup = "prepare-data2"}
+customer %>%
+  count(MaritalStatus) %>% 
+  mutate(pct = n / sum(n)) %>%
+  ggplot(aes(x = MaritalStatus, y = pct)) +
+  geom_col() +
+  scale_y_continuous()
+```
+
+```{r viz5a-solution}
+customer %>%
+  count(MaritalStatus) %>% 
+  mutate(pct = n / sum(n)) %>%
+  ggplot(aes(x = MaritalStatus, y = pct)) +
+  geom_col() +
+  scale_y_continuous(labels = scales::percent)
+```
+
+### 6. Are married customers more educated than single customers?
+
+To answer this questions, in the last section we simply computed the mean and median.  Here, let's compare the distribution with a density plot.  In this case, we want to create a density plot of the *EducationYears* variable but overlay the distribution of married vs. unmarried.  See if you can fill in the arguments for:
+
+- `x` which is the variable we want to see the distribution of
+- `fill` which will color the distributions based on marital status
+- `alpha` which accepts values 0-1 and controls the opacity
+
+```{r viz6, exercise=TRUE, exercise.setup = "prepare-data2"}
+ggplot(customer, aes(x = , fill = )) +
+  geom_density(alpha = )
+```
+
+```{r viz6-hint-1}
+# We want to see the distribution of education years
+ggplot(customer, aes(x = EducationYears, fill = )) +
+  geom_density(alpha = )
+```
+
+```{r viz6-hint-2}
+# we use fill to compare the distributions across the marital status categories
+ggplot(customer, aes(x = EducationYears, fill = MaritalStatus)) +
+  geom_density(alpha = )
+```
+
+```{r viz6-hint-3}
+# and we use alpha to make the distributions transparent which allows us to see
+# how they overlap
+ggplot(customer, aes(x = EducationYears, fill = MaritalStatus)) +
+  geom_density(alpha = .5)
+```
+
+
+### 7. How do monthly expenditures relate to debt?
+
+Now we'll detour from some of the previously asked questions and inject a new one.  Let's assess how credit card debt (*CreditDebt*) and income (*HHIncome*) are related.  First, fill in the code below to assess the relationships between these two variables across all customers.
+
+```{r viz7, exercise=TRUE, exercise.setup = "prepare-data2"}
+ggplot(customer, aes(x = , y = )) +
+  geom_point()
+```
+
+```{r viz7-solution}
+ggplot(customer, aes(x = HHIncome, y = CreditDebt)) +
+  geom_point()
+```
+
+###
+
+This isn't a very revealing plot; however, financial data is often heavily skewed.  Can you adjust the x and y axes to be on logarithmic scale?
+
+```{r viz7b, exercise=TRUE, exercise.setup = "prepare-data2"}
+ggplot(customer, aes(x = HHIncome, y = CreditDebt)) +
+  geom_point()
+```
+
+```{r viz7b-solution}
+ggplot(customer, aes(x = HHIncome, y = CreditDebt)) +
+  geom_point() +
+  scale_x_log10() +
+  scale_y_log10()
+```
+
+###
+
+We see that when we transform our axes, a stronger relationship emerges.  Let's add a linear relationship line with `geom_smooth` to illustrate the relationship.
+
+```{r viz7c, exercise=TRUE, exercise.setup = "prepare-data2"}
+ggplot(customer, aes(x = HHIncome, y = CreditDebt)) +
+  geom_point() +
+  scale_x_log10() +
+  scale_y_log10()
+```
+
+```{r viz7c-solution}
+ggplot(customer, aes(x = HHIncome, y = CreditDebt)) +
+  geom_point() +
+  scale_x_log10() +
+  scale_y_log10() +
+  geom_smooth(method = "lm")
+```
+
+###
+
+Let's expand on this and assess if those who have defaulted on loans tend to have a higher credit debt.  Naturally, we would assume yes but let's see what the data says.  Go ahead and build onto the below code to allow you to compare this relationship across loan defaulters (*LoanDefault*).  You could do this by coloring, facetting, etc.
+
+```{r viz7d, exercise=TRUE, exercise.setup = "prepare-data2"}
+ggplot(customer, aes(x = HHIncome, y = CreditDebt)) +
+  geom_point() +
+  scale_x_log10() +
+  scale_y_log10() +
+  geom_smooth(method = "lm")
+```
+
+```{r viz7d-hint-1}
+# this option facets by LoanDefault
+ggplot(customer, aes(x = HHIncome, y = CreditDebt)) +
+  geom_point() +
+  scale_x_log10() +
+  scale_y_log10() +
+  geom_smooth(method = "lm") +
+  facet_wrap(~ LoanDefault)
+```
+
+```{r viz7d-hint-2}
+# this option colors by LoanDefault and allows us to see the difference in the
+# relationship between defaulters and non-defaulters
+ggplot(customer, aes(x = HHIncome, y = CreditDebt, color = LoanDefault)) +
+  geom_point(alpha = .10) +
+  scale_x_log10() +
+  scale_y_log10() +
+  geom_smooth(method = "lm")
+```
+
+## Understanding Relationships
+
 
 
