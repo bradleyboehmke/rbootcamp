@@ -13,7 +13,7 @@ library(learnr)
     
 ## Welcome
 
-Welcome to this set of tutorials focused on providing a structured learning approach. Through these tutorials you will not only learn the fundamentals of R programming, but you will also apply and perform knowledge checks as you progress through the tutorials. This is accomplished through:
+Welcome to this set of tutorials focused on providing a structured learning approach. Through these tutorials you will not only learn the fundamentals of R programming for exploratory data analysis, but you will also apply and perform knowledge checks as you progress through the tutorials. This is accomplished through:
 
 1. Narrative, figures, illustrations, and equations.
 2. Code exercises (R code chunks that you can edit and execute directly).
