@@ -83,7 +83,7 @@ mtcars
 
 ## Reporting Problems
 
-If you continue to have persistent problems that you cannot resolve please do not hestitate to report the issue at  [https://github.com/bradleyboehmke/learningAnalytics/issues](https://github.com/bradleyboehmke/learningAnalytics/issues).
+If you continue to have persistent problems that you cannot resolve please do not hestitate to report the issue at  [https://github.com/bradleyboehmke/rbootcamp/issues](https://github.com/bradleyboehmke/rbootcamp/issues).
 
 Thanks and I hope you enjoy the tutorials!  
 Brad

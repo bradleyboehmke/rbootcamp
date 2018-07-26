@@ -16,11 +16,11 @@ runtime: shiny_prerendered
 
 This module provides an opportunity to put into practice many of the techniques discussed in this short course. The goal is to think through the tool(s) you’ll need and use them properly to answer the questions. This case study continues to use the *Customer* data and, although not comprehensive, provides you the opportunity to perform several steps in the analytic process to include:
 
-1. Organizing your files
-2. Importing the data
-3. Dealing with missing values
-4. Understanding numerical and categorical variables through descriptive statistics 
-5. Using visualization to understand your data
+1. Importing the data
+2. Dealing with missing values
+3. Understanding numerical and categorical variables through descriptive statistics 
+4. Using visualization to understand your data
+5. Performing basic inferential statistics to compare groups and identify relationships
 
 For this tutorial, I have preloaded the following packages for your use:
 
@@ -243,7 +243,7 @@ question("Which JobCategory has the largest average HHIncome?",
 question("Which JobCategory has the smallest average HHIncome?",
   answer("Crafts"),
   answer("Labor"),
-  answer("Sales", correct = TRUE),
+  answer("Agriculture", correct = TRUE),
   answer("Professional"),
   random_answer_order = TRUE
 )
@@ -493,9 +493,9 @@ customer %>%
 quiz(caption = "Knowledge Check",
  question("What is the median education level for unmarried customers?",
   answer("13.2 years"),
-  answer("14.6 years"),
+  answer("14.6 years", correct = TRUE),
   answer("14 years"),
-  answer("15 years", correct = TRUE),
+  answer("15 years"),
   random_answer_order = TRUE,
   allow_retry = TRUE,
   correct = "That's right; I bet you make up 75% of the smarts in your household!"
@@ -523,9 +523,10 @@ question("Are the education levels about the same for married and unmarried?",
 To answer this question, perform the following sequence:
 
 1. count the number of observations by *Age* and *CarOwnership*
-2. create a new variable that computes the percentage of car leasers
-3. filter for only those customers that lease
-4. arrange your percent leasers variable in descending order
+2. group by *Age*
+3. create a new variable that computes the percentage of car leasers
+4. filter for only those customers that lease
+5. arrange your percent leasers variable in descending order
 
 ```{r descriptive7, exercise=TRUE, exercise.setup = "prepare-data2"}
 # fill in the functions to answer these questions
@@ -540,6 +541,7 @@ customer %>%
 # first we count our data by age and car ownership
 customer %>%
   count(Age, CarOwnership) %>%
+  group_by() %>%
   mutate() %>% 
   filter() %>% 
   arrange()
@@ -550,6 +552,7 @@ customer %>%
 # note how I use the round() to round my percents to 2 decimals
 customer %>%
   count(Age, CarOwnership) %>%
+  group_by(Age) %>%
   mutate(pct_lease = round(n / sum(n), 2)) %>% 
   filter() %>% 
   arrange()
@@ -559,6 +562,7 @@ customer %>%
 # then we can filter for just those customers that lease
 customer %>%
   count(Age, CarOwnership) %>%
+  group_by(Age) %>%
   mutate(pct_lease = round(n / sum(n), 2)) %>% 
   filter(CarOwnership == "Lease") %>% 
   arrange()
@@ -568,6 +572,7 @@ customer %>%
 # and lastly we rank order the data based on percent lease
 customer %>%
   count(Age, CarOwnership) %>%
+  group_by(Age) %>%
   mutate(pct_lease = round(n / sum(n), 2)) %>% 
   filter(CarOwnership == "Lease") %>% 
   arrange(desc(pct_lease))
@@ -580,12 +585,12 @@ quiz(caption = "Knowledge Check",
   answer("39 years"),
   answer("22 years"),
   answer("65 years"),
-  answer("79 years", correct = TRUE),
+  answer("78 years", correct = TRUE),
   random_answer_order = TRUE,
   allow_retry = TRUE
 ),
  question("What age has the lowest percentage of leasers?",
-  answer("39 years", correct = TRUE),
+  answer("18 years", correct = TRUE),
   answer("22 years"),
   answer("65 years"),
   answer("79 years"),
@@ -656,7 +661,12 @@ quiz(caption = "Knowledge Check",
 
 ### 9. Which credit card has the highest default rate?
 
-The goal is to find the top 5 age groups with the largest average *CarValue*.  You can accomplish this by grouping the data by *Age*, computing the mean *CarValue*, and then using the `top_n()` function to find the top 5.
+The goal is to find the credit cards companies (*CreditCard*) with the largest percentage of defaulters (*LoanDefault*).  You can accomplish this by:
+
+1. grouping the data by *CreditCard*, 
+2. counting the number of *LoanDefault*, 
+3. grouping by *LoanDefault*,
+4. computing the percent of *LoanDefault* versus non defaulters.
 
 ```{r descriptive9, exercise=TRUE, exercise.setup = "prepare-data2"}
 # fill in the functions to answer these questions
