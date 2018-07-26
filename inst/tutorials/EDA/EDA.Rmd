@@ -298,7 +298,7 @@ question("How many customers are in the *Service* career field?",
 
 ### 3. How many customers are in each JobCategory across the regions?
 
-Now count the number of observations for each *JobCategory* and *Region* combination.  Rank ordering your data based on the mean income (using `arrange`) will make it easier to interpret the results. 
+Now count the number of observations for each *JobCategory* and *Region* combination.  Rank ordering your results using `arrange` will make it easier to interpret the results. 
 
 ```{r descriptive3, exercise=TRUE, exercise.setup = "prepare-data2"}
 # fill in the count function to answer the question
@@ -350,7 +350,7 @@ question("Which JobCategory and Region has the __least__ amount of customers?",
 
 ### 4. How does HHIncome vary across JobCategory, Region and Gender?
 
-The goal is to group our data by *JobCategory* and then compute the standard deviation of the *HHIncome* variable.  You can compute the standard deviation of variable *x* by using the function `sd(x)`. 
+The goal is to group our data by *JobCategory*, *Region*, or *Gender* and then compute the standard deviation of the *HHIncome* variable.  You can compute the standard deviation of variable *x* by using the function `sd(x)`. 
 
 ```{r descriptive4, exercise=TRUE, exercise.setup = "prepare-data2"}
 # fill in the functions to answer these questions
@@ -412,7 +412,7 @@ question("Is there much difference between Male and Female income variability?",
 
 ### 5. What percentage of our customers are married vs. unmarried? 
 
-Compute the percentage of customers that are married vs. unmarried.  Note that the variable of interest here is *MarritalStatus*.  This will require you to count the number of observations in each level of *MarritalStatus* and then use `mutate` to create a new variable that computes the percentage.
+Compute the percentage of customers that are married vs. unmarried.  Note that the variable of interest here is *MaritalStatus*.  This will require you to count the number of observations in each level of *MaritalStatus* and then use `mutate` to create a new variable that computes the percentage.
 
 ```{r descriptive5, exercise=TRUE, exercise.setup = "prepare-data2"}
 # fill in the functions to answer these questions
@@ -447,7 +447,7 @@ quiz(caption = "Knowledge Check",
 question("How many customers are married?",
   answer("2346"),
   answer("2599"),
-  answer("2401", correct = TRUE),
+  answer("2348", correct = TRUE),
   random_answer_order = TRUE,
   allow_retry = TRUE
 ),
@@ -493,12 +493,12 @@ customer %>%
 quiz(caption = "Knowledge Check",
  question("What is the median education level for unmarried customers?",
   answer("13.2 years"),
-  answer("15.1 years"),
-  answer("14.1 years"),
-  answer("14.6 years", correct = TRUE),
+  answer("14.6 years"),
+  answer("14 years"),
+  answer("15 years", correct = TRUE),
   random_answer_order = TRUE,
   allow_retry = TRUE,
-  correct = "The mean and median education levels are about 14.5 years for both married and unmarried customers."
+  correct = "That's right; I bet you make up 75% of the smarts in your household!"
 ),
  question("What is the mean education level for married customers?",
   answer("13.9 years"),
@@ -513,7 +513,7 @@ question("Are the education levels about the same for married and unmarried?",
   answer("Yes", correct = TRUE),
   random_answer_order = TRUE,
   allow_retry = TRUE,
-  correct = "The mean and median education levels are about 14.5 years for both married and unmarried customers."
+  correct = "Right, the mean and median education levels are about 14.5 years for both married and unmarried customers."
 )
 )
 ```
@@ -580,7 +580,7 @@ quiz(caption = "Knowledge Check",
   answer("39 years"),
   answer("22 years"),
   answer("65 years"),
-  answer("79", correct = TRUE),
+  answer("79 years", correct = TRUE),
   random_answer_order = TRUE,
   allow_retry = TRUE
 ),
@@ -588,7 +588,7 @@ quiz(caption = "Knowledge Check",
   answer("39 years", correct = TRUE),
   answer("22 years"),
   answer("65 years"),
-  answer("79"),
+  answer("79 years"),
   random_answer_order = TRUE,
   allow_retry = TRUE
 )
@@ -637,14 +637,14 @@ quiz(caption = "Knowledge Check",
  question("Which age has the highest average car value?",
   answer("67 years"),
   answer("22 years"),
-  answer("52 years"),
-  answer("57", correct = TRUE),
+  answer("57 years"),
+  answer("52 years", correct = TRUE),
   random_answer_order = TRUE,
   allow_retry = TRUE,
   incorrect = "Look closely.  The top_n function keeps the data ordered by age but identifies those ages with the top 5 largest mean car values."
 ),
  question("What is the average car value for 52 year olds?",
-  answer("$37,389", correct = TRUE),
+  answer("$37,269", correct = TRUE),
   answer("$32,450"),
   answer("$30,111"),
   answer("$36,986"),
@@ -661,33 +661,36 @@ The goal is to find the top 5 age groups with the largest average *CarValue*.  Y
 ```{r descriptive9, exercise=TRUE, exercise.setup = "prepare-data2"}
 # fill in the functions to answer these questions
 customer %>%
+  count() %>%
   group_by() %>%
-  summarize() %>% 
-  top_n(5)
+  mutate() %>%
+  filter() %>%
+  arrange()
 ```
 
 ```{r descriptive9-hint-1}
-# first we group our data by age
+# first we count the defaults by credit card
 customer %>%
-  group_by(Age) %>%
-  summarize() %>% 
-  top_n(5)
+  count(CreditCard, LoanDefault)
 ```
 
 ```{r descriptive9-hint-2}
-# next we compute the mean of the CarValue variable
+# next we group by credit card and comput the percent of defaulters vs non-defaulters
 customer %>%
-  group_by(Age) %>%
-  summarize(avg_value = mean(CarValue)) %>% 
-  top_n(5)
+  count(CreditCard, LoanDefault) %>%
+  group_by(CreditCard) %>%
+  mutate(pct = n / sum(n))
 ```
 
 
 ```{r descriptive9-solution}
+# last we filter for loan defaulters and arrange in descending order to rank order
 customer %>%
-  group_by(Age) %>%
-  summarize(avg_value = mean(CarValue)) %>% 
-  top_n(5)
+  count(CreditCard, LoanDefault) %>%
+  group_by(CreditCard) %>%
+  mutate(pct = n / sum(n)) %>%
+  filter(LoanDefault == "Yes") %>%
+  arrange(desc(pct))
 ```
 
 
@@ -701,7 +704,7 @@ quiz(caption = "Knowledge Check",
   random_answer_order = TRUE,
   allow_retry = TRUE
 ),
- question("Which credit card has the secondhighest loan default?",
+ question("Which credit card has the second highest loan default?",
   answer("Visa"),
   answer("Disc"),
   answer("AMEX", correct = TRUE),
@@ -715,7 +718,8 @@ quiz(caption = "Knowledge Check",
   answer("23%", correct = TRUE),
   answer("29%"),
   random_answer_order = TRUE,
-  allow_retry = TRUE
+  allow_retry = TRUE,
+  correct = "What's in your pocket?"
 )
 )
 ```
@@ -1085,7 +1089,17 @@ ggplot(customer, aes(x = HHIncome)) +
 
 ```{r compare-hint-3}
 # use wilcox.test since data is not normally distributed
-wilcox.test(customer$HHIncome)
+wilcox.test(customer$HHIncome, mu = 51000)
+
+# if you use "greater" and "less" you'll see that our customer data is less than
+# the national average
+wilcox.test(customer$HHIncome, mu = 51000, alternative = "less")
+
+# view this visually
+ggplot(customer, aes(HHIncome)) +
+  geom_histogram() +
+  geom_vline(xintercept = 51000) +
+  scale_x_log10(labels = scales::dollar)
 ```
 
 ```{r compare-question, echo=FALSE}
@@ -1105,10 +1119,12 @@ quiz(caption = "Knowledge Check",
   allow_retry = TRUE
 ),
  question("Is there a statistical difference between our customers average income and the national average income?",
-  answer("No", correct = TRUE),
-  answer("Yes"),
+  answer("No"),
+  answer("Yes", correct = TRUE),
   random_answer_order = TRUE,
-  allow_retry = TRUE
+  allow_retry = TRUE,
+  incorrect = "Be sure to test the greater than and less than alternatives.",
+  correct = "That's right, when we account for the skewness of our data we find that our customers typically have incomes below the national average."
 )
 )
 ```
@@ -1118,7 +1134,7 @@ quiz(caption = "Knowledge Check",
 
 Now let’s say we want to compare the differences between the average credit debt levels for those customers that have defaulted on a loan vs those that have not. Here, we want to perform a two-sample t-test to see if they are statistically different.  
 
-In this case we can modify our `t.test`.  Here we are comparing the credit debt levels between the two categories of loan defaulters ("Yes" vs. "No") with `CreditDebt ~ LoanDefault`.  The results state that the average credit debt for non-defaulters is 1.44 and the average credit debt for defaulters is 3.26.  Plus, we see that the results are statistically significant.
+In this case we can modify our `t.test`.  Here we are comparing the credit debt levels between the two categories of loan defaulters ("Yes" vs. "No") with `CreditDebt ~ LoanDefault`.  The results state that the average credit debt for non-defaulters is 1.44 and the average credit debt for defaulters is 3.26.  Plus, we see that the results are statistically significant (`p-value < 2.2e-16`).
 
 ```{r}
 t.test(CreditDebt ~ LoanDefault, data = customer)
